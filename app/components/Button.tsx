@@ -18,10 +18,10 @@ const Button = forwardRef<HTMLButtonElement, IButtonProps>(({ theme = 'auto', ..
 				'transition-all duration-150 bg-none border-2 font-bold',
 				props.className,
 				{
-					'border-codGray-900 text-codGray-900': theme === 'light',
-					'border-silver-100 text-silver-100': theme === 'light',
+					'border-codGray-900 text-codGray-900 hover:bg-codGray-900 hover:text-white': theme === 'light',
+					'border-silver-100 text-silver-100': theme === 'dark',
 					'dark:border-codGray-900 dark:text-codGray-900 border-codGray-100 text-codGray-100': theme === 'auto-inverted',
-					'border-codGray-900 text-codGray-900 dark:border-codGray-100 dark:text-codGray-100': theme === 'auto',
+					'border-codGray-900 text-codGray-900 hover:bg-codGray-900 hover:text-silver-100 dark:border-codGray-100 dark:text-codGray-100 dark:hover:bg-silver-100 dark:hover:text-codGray-900': theme === 'auto',
 				}
 			)}
 		/>

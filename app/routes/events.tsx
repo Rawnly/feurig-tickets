@@ -8,11 +8,13 @@ import Stripe from 'stripe';
 import Button from '~/components/Button';
 import { supabase } from '~/lib/supabase-client';
 import type { IEvent } from '~/models';
+import { getEventPrice } from '~/models';
 
 export const loader: LoaderFunction = async ({ params }) => {
 	const { data } = await supabase
 		.from<IEvent>('events')
 		.select('*')
+		.limit(10)
 
 	return json(data)
 }
@@ -35,7 +37,16 @@ export const action: ActionFunction = async ({ request }) => {
 		return redirect('/events?error_code=EVENT_EXPIRED_OR_DISABLED')
 	}
 
-	const stripe = new Stripe(process.env.STRIPE_PUBLIC_KEY!, {
+	const eventPrice = await getEventPrice(event.id)
+
+	if ( eventPrice.error ) {
+		console.error(eventPrice.error)
+		return json(eventPrice.error, {
+			status: 500
+		})
+	}
+
+	const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
 		apiVersion: '2020-08-27'
 	})
 
@@ -45,12 +56,13 @@ export const action: ActionFunction = async ({ request }) => {
 			cancel_url: `${request.headers.get('origin')}?state=canceled`,
 			mode: 'payment',
 			metadata: {
-				event_id: event.id
+				event_id: event.id,
+				tier_id: eventPrice?.data?.tierid ?? null
 			},
 			line_items: [
 				{
 					quantity: 1,
-					amount: event.price,
+					amount: eventPrice.data?.current_price ?? eventPrice.data?.base_price ?? event.price,
 					name: `Ticket | ${event.title}`,
 					currency: 'eur',
 					description: event.description
@@ -59,6 +71,8 @@ export const action: ActionFunction = async ({ request }) => {
 		})
 
 		if (!session.url) {
+			console.error('No session url for session_id :=', session.id)
+
 			return json({
 				error: 'No session url'
 			})
@@ -68,6 +82,8 @@ export const action: ActionFunction = async ({ request }) => {
 			status: 301,
 		})
 	} catch (error) {
+		console.error(error);
+
 		const {
 			statusCode,
 			type,
@@ -109,7 +125,7 @@ export default function Events() {
 					</div>
 					<div className='flex flex-col gap-4'>
 						<h2 className='text-3xl font-bold'>{evt.title}</h2>
-						<p className='text-codGray-800 text-sm leading-relaxed text-justify'>{evt.description}</p>
+						<p className='text-codGray-800 dark:text-silver-300 text-sm leading-relaxed text-justify'>{evt.description}</p>
 					</div>
 				</Form>
 			))}

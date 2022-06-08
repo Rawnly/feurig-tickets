@@ -52,12 +52,12 @@ export default function App() {
   const data = useLoaderData()
 
   return (
-    <html lang="en">
+    <html lang="en" className='dark'>
       <head>
         <Meta />
         <Links />
       </head>
-      <body className='dark:bg-codGray-900 font-mono'>
+      <body className='dark:bg-codGray-900 bg-silver-100 text-codGray-900 dark:text-silver-300 font-mono'>
         <Layout>
           <Outlet />
         </Layout>

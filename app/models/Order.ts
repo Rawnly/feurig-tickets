@@ -21,5 +21,5 @@ export const createOrder = (eventId: string, session: Stripe.Checkout.Session) =
 		name: session.customer_details?.name ?? '--',
 		customer_id: session.customer as string | undefined,
 		amount: session.amount_total ?? 0,
-	})
+	}).single()
 }
