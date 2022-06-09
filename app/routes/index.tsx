@@ -36,7 +36,7 @@ export default function Index() {
 
   return (
       <>
-          <Link to={`/events/some-cool-event-name`} className='hover:opacity-75 transition-all'>
+          <Link to={`/events/${event.slug}`} className='hover:opacity-75 transition-all'>
             <div className='flex flex-col items-center justify-center gap-4 text-center'>
               <p className='text-3xl'>UPCOMING EVENT</p>
                 <h1 className='text-5xl font-bold underline'>{event.title}</h1>

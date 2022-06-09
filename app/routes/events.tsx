@@ -1,11 +1,12 @@
 import type { ActionFunction, LoaderFunction, MetaFunction} from '@remix-run/node';
 import { redirect } from '@remix-run/node';
 import { json } from '@remix-run/node';
-import { Form, useLoaderData } from '@remix-run/react';
+import { useLoaderData } from '@remix-run/react';
 import { loadStripe } from '@stripe/stripe-js';
 import { useEffect } from 'react';
+import signale from '../lib/logger.server';
 import Stripe from 'stripe';
-import Button from '~/components/Button';
+import EventCard from '~/components/EventCard';
 import { supabase } from '~/lib/supabase-client';
 import type { IEvent } from '~/models';
 import { getEventPrice } from '~/models';
@@ -40,7 +41,8 @@ export const action: ActionFunction = async ({ request }) => {
 	const eventPrice = await getEventPrice(event.id)
 
 	if ( eventPrice.error ) {
-		console.error(eventPrice.error)
+		signale.error(eventPrice.error)
+
 		return json(eventPrice.error, {
 			status: 500
 		})
@@ -52,18 +54,18 @@ export const action: ActionFunction = async ({ request }) => {
 
 	try {
 		const session = await stripe.checkout.sessions.create({
-			success_url: `${request.headers.get('origin')}?state=success`,
-			cancel_url: `${request.headers.get('origin')}?state=canceled`,
+			success_url: `${request.headers.get('origin')}/checkout-complete?state=success`,
+			cancel_url: `${request.headers.get('origin')}/checkout-complete?state=canceled`,
 			mode: 'payment',
 			metadata: {
 				event_id: event.id,
-				tier_id: eventPrice?.data?.tierid ?? null
+				tier_id: eventPrice?.data?.tier_id ?? null
 			},
 			line_items: [
 				{
 					quantity: 1,
 					amount: eventPrice.data?.current_price ?? eventPrice.data?.base_price ?? event.price,
-					name: `Ticket | ${event.title}`,
+					name: `${eventPrice.data?.tier_name ? `[${eventPrice.data?.tier_name}]` : ''} Ticket for "${event.title}"`,
 					currency: 'eur',
 					description: event.description
 				}
@@ -71,7 +73,7 @@ export const action: ActionFunction = async ({ request }) => {
 		})
 
 		if (!session.url) {
-			console.error('No session url for session_id :=', session.id)
+			signale.error('No session url for session_id :=', session.id)
 
 			return json({
 				error: 'No session url'
@@ -82,7 +84,7 @@ export const action: ActionFunction = async ({ request }) => {
 			status: 301,
 		})
 	} catch (error) {
-		console.error(error);
+		signale.error(error);
 
 		const {
 			statusCode,
@@ -107,27 +109,12 @@ export default function Events() {
 
 	useEffect(() => {
 		loadStripe((window as any).ENV.STRIPE_PUBLIC_KEY)
-	  }, [])
+	}, [])
 
 	return (
 		<div>
 			{events?.map(evt => (
-				<Form method='post' key={evt.id} className='flex max-w-2xl gap-4'>
-					<input type="hidden" name='eventId' value={evt.id} />
-					<div className='min-w-[300px]'>
-						<img
-							src={evt.flyer_image_url ?? 'https://via.placeholder.com/300x300'}
-							alt={evt.slug}
-							onError={({currentTarget}) => currentTarget.src = 'https://via.placeholder.com/200x200/000?text='+evt.slug}
-							className='aspect-square w-[300px] h-[300px] bg-black'
-						/>
-						<Button type='submit' theme='auto' className='w-full mt-2'>BUY TICKETS</Button>
-					</div>
-					<div className='flex flex-col gap-4'>
-						<h2 className='text-3xl font-bold'>{evt.title}</h2>
-						<p className='text-codGray-800 dark:text-silver-300 text-sm leading-relaxed text-justify'>{evt.description}</p>
-					</div>
-				</Form>
+				<EventCard event={evt} key={evt.id} />
 			))}
 		</div>
 	)

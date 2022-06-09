@@ -18,11 +18,11 @@ export interface IEvent {
 	flyer_image_url?: string
 }
 
-interface IEventPrice {
-	tierid: number | null;
-	eventid: number;
-	base_price: number;
+export interface IEventPrice {
+	tier_id: number | null;
+	tier_name: string | null;
 	current_price: number | null
+	base_price: number;
 }
 
 
@@ -34,7 +34,7 @@ export const incrementSoldTickets = (eventId: number, by: number) => {
 }
 
 export const getEventPrice = (eventId: number) => {
-	return supabase.rpc<IEventPrice>('geteventprice', {
-		event_id: eventId
+	return supabase.rpc<IEventPrice>('get_event_price', {
+		_event_id: eventId
 	}).single()
 }
