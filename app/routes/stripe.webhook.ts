@@ -3,7 +3,6 @@ import { json } from '@remix-run/node';
 import Stripe from 'stripe';
 import { sendEmail } from '~/lib/email';
 import { incrementSoldTickets } from '~/models';
-import { createOrder } from '~/models/Order';
 import { createTicketFromOrder } from '~/models/Ticket';
 import signale from 'signale'
 
@@ -42,24 +41,17 @@ export const action: ActionFunction = async ({ request }) => {
 					}, { status: 400 })
 				}
 
-				const order = await createOrder(session.metadata.event_id, session)
-
-				if (order.error) {
-					signale.warn('Failed to create order');
-					signale.error(order.error);
-
-					return json(order.error, {
-						status: 500
-					})
-				}
-
-				const ticket = await createTicketFromOrder(order.data, session.metadata?.tier_id as any ?? null)
+				const ticket = await createTicketFromOrder({
+					email: session.customer_details?.email!,
+					event_id: parseInt(session.metadata.event_id as string),
+					stripe_customer: session.customer as string,
+					full_name: session.customer_details?.name!,
+				}, session.metadata?.tier_id as any ?? null)
 
 				if ( ticket.error ) {
 					signale.warn('Failed to create ticket');
 					signale.error(ticket.error);
 
-					signale.debug('Order Data', order.data)
 					signale.debug('metadata', session.metadata);
 
 
@@ -68,7 +60,7 @@ export const action: ActionFunction = async ({ request }) => {
 					})
 				}
 
-				const incrementSoldTicketResponse = await incrementSoldTickets(order.data.event_id, 1)
+				const incrementSoldTicketResponse = await incrementSoldTickets(ticket.data.event_id, 1)
 
 				if ( incrementSoldTicketResponse.error ) {
 					signale.warn('Failed to increment sold ticket count');

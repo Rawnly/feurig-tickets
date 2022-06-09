@@ -1,6 +1,5 @@
 import signale from 'signale';
 import { supabase } from '~/lib/supabase-client';
-import type { IOrder } from './Order';
 
 export interface ITicket {
 	id: string;
@@ -14,16 +13,22 @@ export interface ITicket {
 	stripe_customer?: string;
 }
 
-export const createTicketFromOrder = (order: IOrder, tier_id: number | null) => {
+interface ICreateTicket {
+	event_id: number;
+	stripe_customer: string,
+	email: string
+	full_name: string
+}
+
+export const createTicketFromOrder = (order: ICreateTicket, tier_id: number | null) => {
 	signale.debug('createTicketFromOrder', order, tier_id);
 
 	return supabase.from<ITicket>('tickets')
 		.insert({
-			order_id: order.id,
 			event_id: order.event_id,
-			stripe_customer: order.customer_id,
+			stripe_customer: order.stripe_customer,
 			email: order.email,
-			full_name: order.name,
+			full_name: order.full_name,
 			tier_id: tier_id || null
 		})
 		.single()

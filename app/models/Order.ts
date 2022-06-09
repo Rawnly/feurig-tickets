@@ -1,7 +1,7 @@
 import type Stripe from 'stripe';
 import { supabase } from '~/lib/supabase-client';
 
-export interface IOrder {
+interface IOrder {
 	id: number
 	event_id: number;
 	email: string
@@ -10,7 +10,7 @@ export interface IOrder {
 	amount: number
 }
 
-export const createOrder = (eventId: string, session: Stripe.Checkout.Session) => {
+ const createOrder = (eventId: string, session: Stripe.Checkout.Session) => {
 	if (!eventId) {
 		throw new Error('No event id provided')
 	}
