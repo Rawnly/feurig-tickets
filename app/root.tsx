@@ -15,6 +15,7 @@ import fontawesome from '@fortawesome/fontawesome-svg-core/styles.css'
 
 import { config } from '@fortawesome/fontawesome-svg-core'
 import Layout from './components/Layout';
+
 config.autoAddCss = false
 
 export const loader: LoaderFunction = async () => {
@@ -52,7 +53,7 @@ export default function App() {
   const data = useLoaderData()
 
   return (
-    <html lang="en" className='dark'>
+    <html lang="en">
       <head>
         <Meta />
         <Links />

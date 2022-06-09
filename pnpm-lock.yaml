@@ -34,6 +34,7 @@ specifiers:
   signale: ^1.4.0
   stripe: ^9.6.0
   tailwindcss: ^3.0.24
+  ts-pattern: ^4.0.3
   typescript: ^4.6.4
   zustand: 4.0.0-rc.1
 
@@ -59,6 +60,7 @@ dependencies:
   react-dom: 17.0.2_react@17.0.2
   signale: 1.4.0
   stripe: 9.6.0
+  ts-pattern: 4.0.3
   zustand: 4.0.0-rc.1_react@17.0.2
 
 devDependencies:
@@ -7649,6 +7651,10 @@ packages:
   /trough/2.1.0:
     resolution: {integrity: sha512-AqTiAOLcj85xS7vQ8QkAV41hPDIJ71XJB4RCUrzo/1GM2CQwhkJGaf9Hgr7BOugMRpgGUrqRg/DrBDl4H40+8g==}
     dev: true
+
+  /ts-pattern/4.0.3:
+    resolution: {integrity: sha512-OxQStbr1MKcYYz3YaXsFSBkMo3zjFODVkV8kaLfOak+sWSfx4B+jkOm/VoaWLhnMP+icnIcJ7ENYEnmpAv3jLg==}
+    dev: false
 
   /tsconfig-paths/3.14.1:
     resolution: {integrity: sha512-fxDhWnFSLt3VuTwtvJt5fpwxBHg5AdKWMsgcPOOIilyjymcYVZoCQF8fvFRezCNfblEXmi+PcM1eYHeOAgXCOQ==}

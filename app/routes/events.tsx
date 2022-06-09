@@ -8,13 +8,13 @@ import signale from '../lib/logger.server';
 import Stripe from 'stripe';
 import EventCard from '~/components/EventCard';
 import { supabase } from '~/lib/supabase-client';
-import type { IEvent } from '~/models';
+import type { IEvent, IFullEvent } from '~/models';
+import { getAllEvents } from '~/models';
+import { countTicketsForEvent } from '~/models';
 import { getEventPrice } from '~/models';
 
 export const loader: LoaderFunction = async ({ params }) => {
-	const { data } = await supabase
-		.from<IEvent>('events')
-		.select('*')
+	const { data } = await getAllEvents()
 		.limit(10)
 
 	return json(data)
@@ -31,11 +31,18 @@ export const action: ActionFunction = async ({ request }) => {
 	const { data: event } = await supabase.from<IEvent>('events')
 		.select('*')
 		.eq('id', eventId.toString())
+		.eq('enabled', true)
 		.gt('date', new Date().toISOString())
 		.single()
 
 	if ( !event || !event.enabled ) {
 		return redirect('/events?error_code=EVENT_EXPIRED_OR_DISABLED')
+	}
+
+	const ticketsCount = await countTicketsForEvent(event.id)
+
+	if ( ticketsCount >= event.total_tickets ) {
+		return redirect('/events?error_code=EVENT_SOLD_OUT')
 	}
 
 	const eventPrice = await getEventPrice(event.id)
@@ -55,8 +62,16 @@ export const action: ActionFunction = async ({ request }) => {
 	try {
 		const session = await stripe.checkout.sessions.create({
 			success_url: `${request.headers.get('origin')}/checkout-complete?state=success`,
-			cancel_url: `${request.headers.get('origin')}/checkout-complete?state=canceled`,
+			cancel_url: `${request.headers.get('origin')}/events?state=operation_cancelled`,
 			mode: 'payment',
+			expires_at: Math.round(new Date().getTime() / 1000) + 60 * 60,
+			payment_intent_data: {
+				metadata: {
+					event_id: event.id,
+					tier_id: eventPrice?.data?.tier_id ?? null
+				},
+			},
+			submit_type: 'book',
 			metadata: {
 				event_id: event.id,
 				tier_id: eventPrice?.data?.tier_id ?? null
@@ -105,14 +120,14 @@ export const meta: MetaFunction = () => ({
 })
 
 export default function Events() {
-	const events = useLoaderData<IEvent[]>()
+	const events = useLoaderData<IFullEvent[]>()
 
 	useEffect(() => {
 		loadStripe((window as any).ENV.STRIPE_PUBLIC_KEY)
 	}, [])
 
 	return (
-		<div>
+		<div className='flex flex-col items-center justify-start space-y-16'>
 			{events?.map(evt => (
 				<EventCard event={evt} key={evt.id} />
 			))}

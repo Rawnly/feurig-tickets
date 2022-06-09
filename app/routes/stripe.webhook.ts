@@ -1,10 +1,9 @@
-import type { ActionFunction} from '@remix-run/node';
+import type { ActionFunction } from '@remix-run/node';
 import { json } from '@remix-run/node';
+import signale from 'signale';
 import Stripe from 'stripe';
-import { sendEmail } from '~/lib/email';
-import { incrementSoldTickets } from '~/models';
-import { createTicketFromOrder } from '~/models/Ticket';
-import signale from 'signale'
+import { checkoutSessionCompleted, checkoutSessionExpired, paymentIntentCreated } from '~/lib/webhooks';
+import { match } from 'ts-pattern'
 
 export const action: ActionFunction = async ({ request }) => {
 	const stripe = new Stripe(process.env.STRIPE_SCRET_KEY!, {
@@ -23,57 +22,21 @@ export const action: ActionFunction = async ({ request }) => {
 	let event: Stripe.Event | null = null
 	try {
 		const payload = await request.text()
-		event = stripe.webhooks.constructEvent(payload, stripeSignature, 'whsec_1426551ef8b7162576629f2d5d92740d9153795462fb5ca95af23190ea2ba999')
+		event = stripe.webhooks.constructEvent(payload, stripeSignature, process.env.STRIPE_WEBHOOK_SECRET!)
 	} catch (error) {
 		signale.error(error)
 		return new Response((error as Stripe.errors.StripeSignatureVerificationError).message, { status: 400 })
 	}
 
 	try {
-		switch ( event.type ) {
-			case 'checkout.session.completed':
-				const session = event.data.object as Stripe.Checkout.Session;
-
-				if ( !session.metadata?.event_id ) {
-					return json({
-						status: 400,
-						message: 'No event id provided',
-					}, { status: 400 })
-				}
-
-				const ticket = await createTicketFromOrder({
-					email: session.customer_details?.email!,
-					event_id: parseInt(session.metadata.event_id as string),
-					stripe_customer: session.customer as string,
-					full_name: session.customer_details?.name!,
-				}, session.metadata?.tier_id as any ?? null)
-
-				if ( ticket.error ) {
-					signale.warn('Failed to create ticket');
-					signale.error(ticket.error);
-
-					signale.debug('metadata', session.metadata);
-
-
-					return json(ticket.error, {
-						status: 500
-					})
-				}
-
-				const incrementSoldTicketResponse = await incrementSoldTickets(ticket.data.event_id, 1)
-
-				if ( incrementSoldTicketResponse.error ) {
-					signale.warn('Failed to increment sold ticket count');
-					signale.error(incrementSoldTicketResponse.error);
-				}
-
-				// Send email with ticket.
-				await sendEmail(ticket.data.email)
-
-				return new Response(null, { status: 201 })
-			default:
-				break
-		}
+		return await match(event)
+			.with({ type: 'checkout.session.completed' }, checkoutSessionCompleted)
+			.with({ type: 'checkout.session.expired' }, checkoutSessionExpired)
+			.with({ type: 'payment_intent.created' }, paymentIntentCreated)
+			.otherwise(event => {
+				signale.warn('Unhandled event', event)
+				return new Response(null, { status: 418 })
+			})
 	} catch (error) {
 		signale.error(error)
 
@@ -81,6 +44,4 @@ export const action: ActionFunction = async ({ request }) => {
 			status: 500
 		})
 	}
-
-	return new Response()
 }

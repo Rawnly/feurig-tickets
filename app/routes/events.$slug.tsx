@@ -1,11 +1,10 @@
-import type { LoaderFunction} from '@remix-run/node';
-import { redirect } from '@remix-run/node';
-import { json } from '@remix-run/node';
+import type { LoaderFunction } from '@remix-run/node';
+import { json, redirect } from '@remix-run/node';
 import { useLoaderData } from '@remix-run/react';
 import EventCard from '~/components/EventCard';
 import { supabase } from '~/lib/supabase-client';
 import type { IEvent, IEventPrice } from '~/models';
-import { getEventPrice } from '~/models';
+import { canBuyTicket, getEventPrice } from '~/models';
 import signale from '../lib/logger.server';
 
 export const loader : LoaderFunction = async ({ params }) => {
@@ -16,6 +15,8 @@ export const loader : LoaderFunction = async ({ params }) => {
 		.select('*')
 		.eq('slug', slug)
 		.single()
+
+
 
 	if ( error ) {
 		signale.error(error)
@@ -33,20 +34,11 @@ export const loader : LoaderFunction = async ({ params }) => {
 		return redirect('/', { status: 301 })
 	}
 
+	const canBuy = await canBuyTicket(event.id)
+
 	return json({
+		canBuy,
 		event,
 		tier: eventPrice.data
 	})
-}
-
-export default function EventDetail() {
-	const data = useLoaderData<{ event: IEvent; tier: IEventPrice }>()
-	console.log(data);
-
-
-	return (
-		<div>
-			{data && <EventCard {...data} />}
-		</div>
-	)
 }

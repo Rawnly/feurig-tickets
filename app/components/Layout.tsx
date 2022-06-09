@@ -9,7 +9,7 @@ const Layout: FC<PropsWithChildren<ILayoutProps>> = (props) => {
 
 	return (
         <section
-			className='grid w-screen h-screen p-8' style={{
+			className='grid w-screen min-h-screen p-8' style={{
 				gridTemplateRows: '[nav] 100px [content] auto [footer] 80px',
 				gridTemplateColumns: '[sidebar] 80px auto'
 			}}
