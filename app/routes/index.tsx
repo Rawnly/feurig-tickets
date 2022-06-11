@@ -41,7 +41,7 @@ export default function Index() {
   }
 
   return (
-      <Layout id='home'>
+      <Layout>
           <Link to={`/events/${event.slug}`} className='hover:opacity-75 transition-all'>
             <div className='flex flex-col items-center justify-center gap-4 text-center'>
               <p className='text-3xl'>UPCOMING EVENT</p>

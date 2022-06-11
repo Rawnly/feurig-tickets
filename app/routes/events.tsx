@@ -74,6 +74,9 @@ export const action: ActionFunction = async ({ request }) => {
 				},
 			},
 			submit_type: 'book',
+			phone_number_collection: {
+				enabled: true,
+			},
 			metadata: {
 				event_id: event.id,
 				tier_id: eventPrice?.data?.tier_id ?? null
@@ -129,7 +132,7 @@ export default function Events() {
 	}, [])
 
 	return (
-		<Layout id='events'>
+		<Layout>
 			<div className='flex flex-col items-center justify-start space-y-16'>
 				{events?.map(evt => (
 					<EventCard showDate event={evt} key={evt.id} />

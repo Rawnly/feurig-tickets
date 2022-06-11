@@ -1,13 +1,13 @@
-import React, { useMemo } from 'react'
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faMousePointer } from '@fortawesome/free-solid-svg-icons'
+import { faMousePointer } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import React, { useMemo } from 'react';
 
 interface ICursorProps {
   x: number;
   y: number
 }
 
-const randomColors = ['red', 'green', 'blue', 'yellow', 'orange', 'purple', 'pink', 'brown', 'black']
+const randomColors = ['#1B9CFC', '#25CCF7', '#FC427B', '#F97F51', '#2C3A47', '#7d5fff', '#4b4b4b']
 
 const Cursor : React.FC<ICursorProps> = ({ x = 0, y = 0 }) => {
   const color = useMemo(() => randomColors[Math.floor(Math.random() * randomColors.length)], [])

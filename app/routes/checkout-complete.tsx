@@ -35,7 +35,7 @@ export default function CheckoutComplete() {
 	}
 
 	return (
-		<Layout id='checkout-complete'>
+		<Layout>
 			<div className='flex flex-col max-w-xl gap-4'>
 				<h1 className='mb-8 text-3xl font-bold text-center'>Checkout Success 🎉</h1>
 
