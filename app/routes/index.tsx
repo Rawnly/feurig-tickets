@@ -1,24 +1,28 @@
-import type { LoaderFunction, MetaFunction} from "@remix-run/node";
-import { redirect } from "@remix-run/node";
-import { json } from "@remix-run/node";
+import type { LoaderFunction, MetaFunction } from "@remix-run/node";
+import { json, redirect } from "@remix-run/node";
 import { Link, useLoaderData } from '@remix-run/react';
 import { format } from 'date-fns';
 import Layout from '~/components/Layout';
-import Room from '~/components/Room';
 import { supabase } from '~/lib/supabase-client';
 import type { IEvent } from '~/models';
 
 export const loader: LoaderFunction = async () => {
-  const event = await supabase.from<IEvent>('events')
+  const events = await supabase.from<IEvent>('events')
     .select('*')
     .gte('date', new Date().toISOString())
-    .single()
+    .order('date', { ascending: true })
 
-  if ( !event.data ) {
+  if ( events.error ) {
+    console.error(events.error)
+
     return redirect('/events')
   }
 
-  return json(event.data)
+  if ( events.data.length === 1 ) {
+    return json(events.data[0])
+  }
+
+  return json(events.data[0])
 }
 
 export const meta: MetaFunction = () => ({

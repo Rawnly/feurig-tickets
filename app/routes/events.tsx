@@ -132,7 +132,7 @@ export default function Events() {
 		<Layout id='events'>
 			<div className='flex flex-col items-center justify-start space-y-16'>
 				{events?.map(evt => (
-					<EventCard event={evt} key={evt.id} />
+					<EventCard showDate event={evt} key={evt.id} />
 				))}
 			</div>
 		</Layout>
