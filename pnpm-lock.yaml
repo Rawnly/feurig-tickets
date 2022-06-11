@@ -7,6 +7,8 @@ specifiers:
   '@fortawesome/free-solid-svg-icons': ^6.1.1
   '@fortawesome/react-fontawesome': ^0.1.18
   '@heroicons/react': ^1.0.6
+  '@liveblocks/client': ^0.16.17
+  '@liveblocks/react': ^0.16.17
   '@remix-run/dev': ^1.5.1
   '@remix-run/eslint-config': ^1.5.1
   '@remix-run/node': ^1.5.1
@@ -45,6 +47,8 @@ dependencies:
   '@fortawesome/free-solid-svg-icons': 6.1.1
   '@fortawesome/react-fontawesome': 0.1.18_nee7k2mmznvunamfg4ebivqgfa
   '@heroicons/react': 1.0.6_react@17.0.2
+  '@liveblocks/client': 0.16.17
+  '@liveblocks/react': 0.16.17_y7mgngzilysng7ia3t4m5lhg4i
   '@remix-run/node': 1.5.1_sfoxds7t5ydpegc3knd667wn6m
   '@remix-run/react': 1.5.1_sfoxds7t5ydpegc3knd667wn6m
   '@remix-run/serve': 1.5.1_sfoxds7t5ydpegc3knd667wn6m
@@ -1554,6 +1558,20 @@ packages:
       '@jridgewell/resolve-uri': 3.0.7
       '@jridgewell/sourcemap-codec': 1.4.13
     dev: true
+
+  /@liveblocks/client/0.16.17:
+    resolution: {integrity: sha512-mWX/EGQNoWwzkEdUfdt82w9OMA5kKV3BraBt2YhZO4Zn04mfNmcOkr7V4S+EmJ4LyQ5QVNKYvA4gJQU1ahn5mQ==}
+    dev: false
+
+  /@liveblocks/react/0.16.17_y7mgngzilysng7ia3t4m5lhg4i:
+    resolution: {integrity: sha512-I0WvNI+X/I+ymbVF/+W4GOCaZnsaqje01Mp9BGt7u7joL1ZNBQuva1zWPINE6pNWTk75y/pmG4o56YoC+ek4FQ==}
+    peerDependencies:
+      '@liveblocks/client': 0.16.17
+      react: ^16.14.0 || ^17 || ^18
+    dependencies:
+      '@liveblocks/client': 0.16.17
+      react: 17.0.2
+    dev: false
 
   /@nodelib/fs.scandir/2.1.5:
     resolution: {integrity: sha512-vq24Bq3ym5HEQm2NKCr3yXDwjc7vTsEThRDnkp2DK9p1uqLR+DHurm/NOTo0KG7HYHU7eppKZj3MyqYuMBf62g==}

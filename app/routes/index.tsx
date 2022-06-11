@@ -3,6 +3,8 @@ import { redirect } from "@remix-run/node";
 import { json } from "@remix-run/node";
 import { Link, useLoaderData } from '@remix-run/react';
 import { format } from 'date-fns';
+import Layout from '~/components/Layout';
+import Room from '~/components/Room';
 import { supabase } from '~/lib/supabase-client';
 import type { IEvent } from '~/models';
 
@@ -35,7 +37,7 @@ export default function Index() {
   }
 
   return (
-      <>
+      <Layout id='home'>
           <Link to={`/events/${event.slug}`} className='hover:opacity-75 transition-all'>
             <div className='flex flex-col items-center justify-center gap-4 text-center'>
               <p className='text-3xl'>UPCOMING EVENT</p>
@@ -43,6 +45,6 @@ export default function Index() {
               <p className='text-2xl'>{format(new Date(event.date), 'Pp')}</p>
             </div>
           </Link>
-      </>
+      </Layout>
   );
 }

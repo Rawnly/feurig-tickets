@@ -12,6 +12,8 @@ import type { IEvent, IFullEvent } from '~/models';
 import { getAllEvents } from '~/models';
 import { countTicketsForEvent } from '~/models';
 import { getEventPrice } from '~/models';
+import Room from '~/components/Room';
+import Layout from '~/components/Layout';
 
 export const loader: LoaderFunction = async ({ params }) => {
 	const { data } = await getAllEvents()
@@ -127,10 +129,12 @@ export default function Events() {
 	}, [])
 
 	return (
-		<div className='flex flex-col items-center justify-start space-y-16'>
-			{events?.map(evt => (
-				<EventCard event={evt} key={evt.id} />
-			))}
-		</div>
+		<Layout id='events'>
+			<div className='flex flex-col items-center justify-start space-y-16'>
+				{events?.map(evt => (
+					<EventCard event={evt} key={evt.id} />
+				))}
+			</div>
+		</Layout>
 	)
 }

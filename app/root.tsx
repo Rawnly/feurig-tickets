@@ -8,7 +8,10 @@ import {
   Scripts,
   ScrollRestoration,
   useLoaderData,
+  useLocation,
 } from "@remix-run/react";
+import { createClient } from '@liveblocks/client'
+import { LiveblocksProvider, RoomProvider } from '@liveblocks/react'
 
 import tailwindcss from './tailwind.css'
 import fontawesome from '@fortawesome/fontawesome-svg-core/styles.css'
@@ -22,7 +25,8 @@ export const loader: LoaderFunction = async () => {
   return json( {
     ENV: {
       STRIPE_PUBLIC_KEY: process.env.STRIPE_PUBLIC_KEY,
-      SUPABASE_URL: process.env.SUPABASE_URL
+      SUPABASE_URL: process.env.SUPABASE_URL,
+      LIVEBLOCKS_PUBLIC_APIKEY: process.env.LIVEBLOCKS_PUBLIC_APIKEY
     }
   } )
 }
@@ -49,8 +53,15 @@ export const links: LinksFunction = () => [
   }
 ]
 
+
+
 export default function App() {
+  const location = useLocation()
   const data = useLoaderData()
+
+  const client = createClient({
+    publicApiKey: data.ENV.LIVEBLOCKS_PUBLIC_APIKEY!
+  })
 
   return (
     <html lang="en">
@@ -59,10 +70,19 @@ export default function App() {
         <Links />
       </head>
       <body className='dark:bg-codGray-900 bg-silver-100 text-codGray-900 dark:text-silver-300 font-mono'>
-        <Layout>
-          <Outlet />
-        </Layout>
-
+        <LiveblocksProvider client={client}>
+          <RoomProvider
+            id={location.pathname ?? 'flanda'}
+            initialPresence={{
+              cursor: {
+                x: 0,
+                y: 0
+              }
+            }}
+          >
+            <Outlet />
+          </RoomProvider>
+        </LiveblocksProvider>
         <ScrollRestoration />
         <script dangerouslySetInnerHTML={{
           __html: `window.ENV = ${JSON.stringify( data.ENV )}`
